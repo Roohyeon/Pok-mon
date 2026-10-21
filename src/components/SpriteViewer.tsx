@@ -19,7 +19,9 @@ export function SpriteViewer({ id, name }: { id: number; name: string }) {
         <div className="checker absolute -inset-x-1/2 -top-1/2 bottom-0 origin-bottom [transform:rotateX(55deg)]" />
       </div>
 
-      <div className="relative grid h-full place-items-center pb-10">
+      {/* 도트는 아래(origin-bottom)를 기준으로 2배 커지므로, 가운데가 아니라 바닥 쪽에 세워야
+          큰 최종 진화형(리자몽·갸라도스 등)의 머리가 위로 잘리지 않음 */}
+      <div className="relative flex h-full items-end justify-center pb-14">
         <div className="relative grid place-items-center">
           {/* 흐림 없는 평평한 그림자 */}
           <span aria-hidden className="absolute -bottom-1 h-3 w-28 rounded-[50%] bg-shade" />

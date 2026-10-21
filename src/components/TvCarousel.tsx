@@ -430,6 +430,10 @@ function MenuItem({
   );
 }
 
+// 정보 창 도트 이미지: 최대 배율, 칸에서 차지할 최대 비율(여백 확보)
+const MAX_SPRITE_SCALE = 2.4;
+const SPRITE_FILL = 0.86;
+
 // 한 번 받은 정보는 다시 요청하지 않도록 모듈 단위로 보관
 const detailCache = new Map<number, PokemonDetail | "error">();
 
@@ -445,6 +449,24 @@ function InfoWindow({ family, onClose }: { family: PokemonFamily; onClose: () =>
   const [, rerender] = useState(0);
   const detail = detailCache.get(summary.id);
   const [animatedFailed, setAnimatedFailed] = useState<Record<number, boolean>>({});
+  const spriteUrl = spriteSrc(summary.id, animatedFailed[summary.id] ? "pixel" : "animated");
+
+  // 움직이는 도트는 포켓몬마다 원본 크기가 달라서(이상해씨 ≈ 40px, 갸라도스 ≈ 100px)
+  // 같은 배율로 키우면 큰 최종 진화형이 칸 밖으로 잘림 → 칸 크기에 맞춰 배율을 계산
+  const spriteBoxRef = useRef<HTMLDivElement>(null);
+  const [spriteBox, setSpriteBox] = useState<{ w: number; h: number } | null>(null);
+  const [natural, setNatural] = useState<{ src: string; w: number; h: number } | null>(null);
+  useEffect(() => {
+    const el = spriteBoxRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setSpriteBox({ w: entry.contentRect.width, h: entry.contentRect.height }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const spriteScale =
+    natural?.src === spriteUrl && spriteBox
+      ? Math.min(MAX_SPRITE_SCALE, (spriteBox.w * SPRITE_FILL) / natural.w, (spriteBox.h * SPRITE_FILL) / natural.h)
+      : null;
 
   useEffect(() => {
     if (detailCache.has(summary.id)) return;
@@ -510,16 +532,27 @@ function InfoWindow({ family, onClose }: { family: PokemonFamily; onClose: () =>
 
           <div className="flex flex-col gap-4 p-4 sm:grid sm:grid-cols-[200px_1fr]">
             {/* 움직이는 도트 */}
-            <div className="tv-card-mini grid aspect-[16/9] w-full place-items-center overflow-hidden sm:aspect-square sm:self-start" style={{ "--type": color } as React.CSSProperties}>
+            <div
+              ref={spriteBoxRef}
+              className="tv-card-mini grid aspect-[4/3] w-full place-items-center overflow-hidden sm:aspect-square sm:self-start"
+              style={{ "--type": color } as React.CSSProperties}
+            >
               <Image
                 key={summary.id}
-                src={spriteSrc(summary.id, animatedFailed[summary.id] ? "pixel" : "animated")}
+                src={spriteUrl}
                 alt={summary.nameKo}
                 width={96}
                 height={96}
                 unoptimized
+                onLoad={(e) => setNatural({ src: spriteUrl, w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })}
                 onError={() => setAnimatedFailed((f) => ({ ...f, [summary.id]: true }))}
-                className="pixelated h-auto w-auto scale-[2.2]"
+                // 크기를 알기 전에는 숨겨서, 잘못된 크기로 잠깐 보이는 일이 없게 함
+                style={
+                  spriteScale && natural
+                    ? { width: natural.w * spriteScale, height: natural.h * spriteScale }
+                    : { visibility: "hidden" }
+                }
+                className="pixelated max-w-none"
               />
             </div>
 
