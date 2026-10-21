@@ -1,0 +1,329 @@
+@import "tailwindcss";
+
+/* 픽셀 폰트(갈무리11)는 layout.tsx에서 next/font/local로 불러와 --font-galmuri 변수로 주입
+   DESIGN.md의 Arcade 폰트 대신, 한글을 지원하는 픽셀 폰트를 유일한 서체로 사용 */
+
+/* ── 디자인 토큰 (DESIGN.md · 라이트 전용) ── */
+:root {
+  --color-arcade-cream: #f3e5df;
+  --color-ink-black: #000000;
+  --color-pixel-gray: #e5e7eb;
+  --color-charcoal: #333333;
+  --color-carbon: #151515;
+  --color-muted-gray: #737373;
+  --color-marquee-orange: #faa21f;
+  --color-buy-green: #128e44;
+
+  --shadow-subtle: rgb(243, 229, 223) 0px 1px 0px 0px inset;
+}
+
+@theme inline {
+  --color-cream: var(--color-arcade-cream);
+  --color-ink: var(--color-ink-black);
+  --color-line: var(--color-pixel-gray);
+  --color-shade: var(--color-charcoal);
+  --color-muted: var(--color-muted-gray);
+  --color-marquee: var(--color-marquee-orange);
+  --color-buy: var(--color-buy-green);
+
+  --font-pixel: var(--font-galmuri), ui-monospace, monospace;
+
+  /* 글자 크기는 10 / 14 / 16 / 18px 네 단계만 사용 */
+  --text-caption: 10px;
+  --text-caption--line-height: 1.5;
+
+  --radius-btn: 6px;
+  --radius-card: 12px;
+}
+
+/* 다크 모드 없음: 캔버스는 항상 크림색 */
+html { color-scheme: light; }
+
+body {
+  background-color: var(--color-arcade-cream);
+  color: var(--color-ink-black);
+  font-family: var(--font-pixel);
+  -webkit-font-smoothing: none; /* 픽셀 폰트가 흐려지지 않게 */
+}
+
+/* 아래 컴포넌트 클래스는 components 레이어에 둬서 Tailwind 유틸리티로 덮어쓸 수 있게 함 */
+@layer components {
+  /* ── 카드: 크림 바탕 + 1px 회색 테두리 + 12px 모서리 ── */
+  .card {
+    background: var(--color-arcade-cream);
+    border: 1px solid var(--color-pixel-gray);
+    border-radius: 12px;
+  }
+
+  /* ── 버튼: 6px 모서리 + 1px 검정 테두리 + 상단 1px 크림 하이라이트 ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 1px solid var(--color-ink-black);
+    border-radius: 6px;
+    background: var(--color-arcade-cream);
+    padding: 4px 12px;
+    font-size: 14px;
+    line-height: 1.43;
+    box-shadow: var(--shadow-subtle);
+    transition: transform 80ms steps(2);
+  }
+  .btn:active { transform: translateY(1px); }
+  /* 눌린(선택된) 상태는 검정 채움 */
+  .btn[aria-pressed="true"] {
+    background: var(--color-ink-black);
+    color: var(--color-arcade-cream);
+    font-weight: 700;
+  }
+  /* 화면에서 단 하나뿐인 주요 동작 */
+  .btn-primary {
+    background: var(--color-buy-green);
+    border-color: var(--color-buy-green);
+    color: #fff;
+    font-weight: 700;
+    padding: 8px 12px;
+  }
+
+  /* ── 알약 태그 ── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--color-ink-black);
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  /* ── 체커보드: 순수 검정 / 크림 ── */
+  .checker {
+    background-color: var(--color-arcade-cream);
+    background-image: conic-gradient(
+      var(--color-ink-black) 25%, transparent 0 50%,
+      var(--color-ink-black) 0 75%, transparent 0
+    );
+    background-size: var(--checker, 48px) var(--checker, 48px);
+  }
+}
+
+/* ── 상단 마키 바 ── */
+.marquee {
+  background: linear-gradient(to right, #faa21f, #fef3c7, #faa21f);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 30s linear infinite;
+}
+@keyframes marquee-scroll {
+  to { transform: translateX(-50%); }
+}
+
+/* ── 랜딩: CRT TV ──
+   DESIGN.md의 크림 캔버스와 별개로, 랜딩만 레퍼런스 이미지(파란 도트 하늘 TV)를 따름 */
+.crt-bezel {
+  padding: clamp(12px, 3vw, 36px);
+  border-radius: clamp(24px, 4vw, 48px);
+  background: linear-gradient(160deg, #6b6b6f, #3a3a3e 45%, #232326);
+  box-shadow:
+    inset 0 2px 0 #8a8a8f,
+    inset 0 -3px 0 #151517;
+}
+.crt-screen {
+  position: relative;
+  overflow: hidden;
+  height: min(78dvh, 680px);
+  min-height: 520px;
+  border-radius: 9% / 11%;
+  box-shadow: 0 0 0 4px #111;
+}
+.landing-sky {
+  /* 계단처럼 끊어지는 하늘색 띠 + 뒤쪽의 밝은 반원 */
+  background:
+    radial-gradient(ellipse 58% 62% at 50% 92%, #eaf1fd 0 52%, #cfe0f9 52% 64%, #b4cdf4 64% 76%, transparent 76%),
+    linear-gradient(to bottom,
+      #4a7bd8 0 10%, #5a89de 10% 20%, #6c97e3 20% 32%,
+      #82a8ea 32% 46%, #9dbbf0 46% 62%, #bcd2f5 62%);
+}
+/* 띠 경계를 도트 디더링처럼 보이게 하는 아주 옅은 체커 */
+.landing-sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: conic-gradient(rgb(255 255 255 / 0.07) 25%, transparent 0 50%, rgb(255 255 255 / 0.07) 0 75%, transparent 0);
+  background-size: 8px 8px;
+}
+.crt-scanlines {
+  background:
+    radial-gradient(ellipse at 20% 10%, rgb(255 255 255 / 0.18), transparent 40%),
+    repeating-linear-gradient(to bottom, rgb(10 20 60 / 0.09) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 80px rgb(10 25 80 / 0.45);
+  border-radius: inherit;
+}
+.landing-title {
+  font-weight: 700;
+  font-size: clamp(56px, 13vw, 148px);
+  line-height: 1;
+  color: #1e3a9e;
+  /* 계단식 입체 그림자 */
+  text-shadow:
+    0.04em 0.04em 0 #5b7fd8,
+    0.08em 0.08em 0 #c4d6f7;
+}
+.landing-sub {
+  font-weight: 700;
+  font-size: clamp(22px, 4.4vw, 44px);
+  line-height: 1.2;
+  color: #fff;
+  /* 픽셀 외곽선 */
+  text-shadow:
+    3px 0 #2a52c9, -3px 0 #2a52c9, 0 3px #2a52c9, 0 -3px #2a52c9,
+    3px 3px #2a52c9, -3px -3px #2a52c9, 3px -3px #2a52c9, -3px 3px #2a52c9,
+    0 6px #1e3a9e;
+}
+.start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border: 3px solid #2a52c9;
+  border-radius: 6px;
+  background: #fff;
+  color: #1e3a9e;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 0 #1e3a9e;
+  transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+}
+.start-btn:hover { background: #eaf1fd; }
+.start-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #1e3a9e; }
+.crt-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: crt-flash 320ms steps(4) forwards;
+}
+@keyframes crt-flash {
+  from { opacity: 0; transform: scaleY(0.02); }
+  50% { opacity: 1; transform: scaleY(0.02); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+.cloud-drift { animation: cloud-drift 9s steps(9) infinite alternate; }
+.cloud-drift-slow { animation: cloud-drift 13s steps(13) infinite alternate-reverse; }
+@keyframes cloud-drift { to { translate: 36px 0; } }
+
+/* ── TV 진열장 ── */
+/* TV 속 UI 공통 색: 흰 바탕 + 파란 픽셀 테두리 (Press Start 버튼과 같은 계열) */
+.tv-btn {
+  display: inline-grid;
+  place-items: center;
+  border: 3px solid #2a52c9;
+  border-radius: 6px;
+  background: #fff;
+  color: #1e3a9e;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 0 #1e3a9e;
+  transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+}
+.tv-btn:hover { background: #eaf1fd; }
+.tv-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #1e3a9e; }
+.tv-btn:disabled { opacity: 0.4; pointer-events: none; }
+.tv-window {
+  border: 3px solid #2a52c9;
+  border-radius: 6px;
+  background: #fff;
+  color: #1e3a9e;
+  box-shadow: 0 6px 0 #1e3a9e;
+}
+/* 하늘 위 글자가 잘 읽히도록 흰 픽셀 외곽선 */
+.tv-label {
+  text-shadow: 2px 0 #eaf1fd, -2px 0 #eaf1fd, 0 2px #eaf1fd, 0 -2px #eaf1fd;
+}
+
+/* 원통 진열장: 카드 하나가 들어가는 칸. 화면 정중앙을 기준으로 3D 배치 */
+.tv-card-slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+  transition: transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms;
+  backface-visibility: hidden;
+}
+.tv-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: 10px 8px 12px;
+  overflow: hidden;
+  border-radius: 14px;
+  color: #fff;
+  text-align: center;
+  /* 타입 색 → 짙은 남색으로 떨어지는 배경 */
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 42%, color-mix(in srgb, var(--type) 70%, #fff) 0, transparent 70%),
+    linear-gradient(170deg, var(--type), color-mix(in srgb, var(--type) 35%, #0b1230));
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.85), 0 10px 0 rgb(14 28 80 / 0.35);
+  text-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+  cursor: pointer;
+}
+/* 카드 위 옅은 주사선 */
+.tv-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.08) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+.tv-card[aria-current="true"] { box-shadow: 0 0 0 4px #fff, 0 0 0 7px #2a52c9, 0 12px 0 rgb(14 28 80 / 0.35); }
+.tv-card-mini {
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 45%, color-mix(in srgb, var(--type) 60%, #fff) 0, transparent 70%),
+    linear-gradient(170deg, var(--type), color-mix(in srgb, var(--type) 35%, #0b1230));
+}
+.tv-type {
+  border: 2px solid rgb(255 255 255 / 0.85);
+  border-radius: 9999px;
+  padding: 0 8px;
+  font-size: 10px;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+/* 로딩 칸: 차례로 켜졌다 꺼짐 */
+.loading-cell { background: rgb(255 255 255 / 0.15); animation: loading-cell 960ms steps(1) infinite; }
+@keyframes loading-cell { 0%, 40% { background: #fff; } }
+
+/* 도트 이미지를 확대해도 뭉개지지 않게 */
+.pixelated { image-rendering: pixelated; }
+
+/* 키보드 사용자를 위한 포커스 표시 */
+@layer base {
+  :focus-visible {
+    outline: 2px dashed var(--color-ink-black);
+    outline-offset: 3px;
+  }
+}
+
+/* 카드 hover 시 1칸씩 "툭" 움직이는 계단식 애니메이션 */
+@keyframes px-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.group:hover .bob { animation: px-bob 600ms steps(2) infinite; }
+
+@keyframes px-blink { 50% { opacity: 0; } }
+.blink { animation: px-blink 1s steps(1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .bob, .blink, .marquee-track,
+  .cloud-drift, .cloud-drift-slow, .loading-cell { animation: none; }
+  .tv-card-slot { transition: none; }
+}
